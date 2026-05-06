@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Support Widget — Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .hero {
+      max-width: 680px; margin: 0 auto; padding: 80px 24px 40px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block; background: #ede9fe; color: #6366f1;
+      padding: 4px 14px; border-radius: 99px; font-size: 13px; font-weight: 600;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 2.4rem; font-weight: 800; color: #0f172a; line-height: 1.15; margin-bottom: 16px; }
+    p { font-size: 1.1rem; color: #64748b; line-height: 1.7; margin-bottom: 32px; }
+    .code-block {
+      background: #1e293b; color: #e2e8f0; border-radius: 12px;
+      padding: 20px 24px; text-align: left; font-family: monospace; font-size: 14px;
+      line-height: 1.8; margin-bottom: 24px;
+    }
+    .code-block .comment { color: #64748b; }
+    .code-block .keyword { color: #818cf8; }
+    .code-block .string { color: #34d399; }
+    .features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-top: 40px;
+    }
+    .feature {
+      background: #fff; border-radius: 12px; padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .feature-icon { font-size: 24px; margin-bottom: 10px; }
+    .feature h3 { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .feature p { font-size: 13px; color: #64748b; margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="badge">Live Demo</div>
+    <h1>AI Support Widget<br/>Powered by RAG</h1>
+    <p>
+      Embed a smart chatbot trained on your documentation.
+      Click the purple button at the bottom right to try it.
+    </p>
+
+    <div class="code-block">
+      <span class="comment">&lt;!-- Add to your website in 2 lines --&gt;</span><br/>
+      &lt;<span class="keyword">script</span> <span class="string">src</span>=<span class="string">"https://yourdomain.com/widget.js"</span>&gt;&lt;/<span class="keyword">script</span>&gt;<br/>
+      &lt;<span class="keyword">script</span>&gt;<br/>
+      &nbsp;&nbsp;RAGSupport.<span class="keyword">init</span>({<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">tenantId</span>: <span class="string">"your-business-id"</span>,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">apiUrl</span>: <span class="string">"https://api.yourdomain.com"</span>,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">primaryColor</span>: <span class="string">"#6366f1"</span>,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">title</span>: <span class="string">"Support Assistant"</span><br/>
+      &nbsp;&nbsp;});<br/>
+      &lt;/<span class="keyword">script</span>&gt;
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📄</div>
+        <h3>Any document</h3>
+        <p>Ingest PDFs, web pages, or plain text files.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💬</div>
+        <h3>Conversation history</h3>
+        <p>Remembers context within the session.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🏢</div>
+        <h3>Multi-tenant</h3>
+        <p>Each client gets their own isolated knowledge base.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <h3>Analytics</h3>
+        <p>Track questions, cost per query, and latency.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="widget.js"></script>
+  <script>
+    RAGSupport.init({
+      apiUrl: "http://localhost:8000",
+      tenantId: "demo",
+      primaryColor: "#6366f1",
+      title: "Support Assistant",
+      welcomeMessage: "Hi! Ask me anything about our product.",
+    });
+  </script>
+</body>
+</html>

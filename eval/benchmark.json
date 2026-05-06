@@ -1,0 +1,63 @@
+{
+  "description": "Benchmark dataset for RAG Support evaluation. Each entry has a question, expected answer keywords, and the source document it should be retrieved from.",
+  "version": "1.0",
+  "tenant_id": "demo",
+  "samples": [
+    {
+      "id": "q001",
+      "question": "What is your return policy?",
+      "expected_keywords": ["return", "days", "refund"],
+      "expected_source_hint": "faq",
+      "category": "returns"
+    },
+    {
+      "id": "q002",
+      "question": "How long does shipping take?",
+      "expected_keywords": ["shipping", "days", "delivery"],
+      "expected_source_hint": "faq",
+      "category": "shipping"
+    },
+    {
+      "id": "q003",
+      "question": "Do you offer international shipping?",
+      "expected_keywords": ["international", "ship", "countries"],
+      "expected_source_hint": "faq",
+      "category": "shipping"
+    },
+    {
+      "id": "q004",
+      "question": "How do I track my order?",
+      "expected_keywords": ["track", "order", "email", "link"],
+      "expected_source_hint": "faq",
+      "category": "orders"
+    },
+    {
+      "id": "q005",
+      "question": "What payment methods do you accept?",
+      "expected_keywords": ["payment", "credit", "card", "paypal"],
+      "expected_source_hint": "faq",
+      "category": "payment"
+    },
+    {
+      "id": "q006",
+      "question": "Can I change my order after placing it?",
+      "expected_keywords": ["change", "order", "cancel", "modify"],
+      "expected_source_hint": "faq",
+      "category": "orders"
+    },
+    {
+      "id": "q007",
+      "question": "What is the warranty on your products?",
+      "expected_keywords": ["warranty", "year", "months", "guarantee"],
+      "expected_source_hint": "faq",
+      "category": "product"
+    },
+    {
+      "id": "q008",
+      "question": "How do I contact customer support?",
+      "expected_keywords": ["contact", "email", "phone", "support"],
+      "expected_source_hint": "faq",
+      "category": "support"
+    }
+  ]
+}

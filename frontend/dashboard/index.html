@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Support — Admin Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366f1; --primary-dark: #4f46e5; --bg: #f8fafc;
+      --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+      --success: #10b981; --danger: #ef4444; --warn: #f59e0b;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 60px;
+    }
+    .logo { font-weight: 800; font-size: 18px; color: var(--primary); }
+    .header-right { display: flex; gap: 12px; align-items: center; }
+    .badge { background: #ede9fe; color: var(--primary); padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 12px; }
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+    .stat-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 800; }
+    .stat-value.green { color: var(--success); }
+    .stat-value.blue { color: var(--primary); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .card h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+    .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    input, select, textarea {
+      border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px;
+      font-size: 14px; font-family: inherit; outline: none; background: #fff; color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    input[type=text], input[type=password] { flex: 1; }
+    button {
+      padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 600; font-family: inherit; transition: opacity .15s;
+    }
+    button:hover { opacity: .88; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost { background: #f1f5f9; color: var(--text); }
+    .sources-list { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+    .source-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;
+    }
+    .source-info { font-size: 14px; }
+    .source-name { font-weight: 600; }
+    .source-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .upload-area {
+      border: 2px dashed var(--border); border-radius: 10px; padding: 28px;
+      text-align: center; color: var(--muted); cursor: pointer; transition: border-color .2s;
+    }
+    .upload-area:hover, .upload-area.drag { border-color: var(--primary); color: var(--primary); }
+    .upload-area input { display: none; }
+    .log-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .log-table th { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 600; }
+    .log-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 8px;
+      font-size: 14px; z-index: 9999; opacity: 0; transition: opacity .3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .pill-green { background: #d1fae5; color: #065f46; }
+    .pill-red { background: #fee2e2; color: #991b1b; }
+    #empty-sources { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ RAG Support</div>
+  <div class="header-right">
+    <span class="badge" id="tenant-badge">tenant: demo</span>
+    <input type="password" id="api-key-input" placeholder="Admin API Key" style="width:180px" />
+    <input type="text" id="tenant-input" placeholder="Tenant ID" style="width:130px" value="demo" />
+    <button class="btn-primary" onclick="refreshAll()">Load</button>
+  </div>
+</header>
+
+<main>
+  <div class="section-title">Overview</div>
+  <div class="grid-stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Questions</div>
+      <div class="stat-value blue" id="stat-questions">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Cost</div>
+      <div class="stat-value" id="stat-cost">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Latency</div>
+      <div class="stat-value" id="stat-latency">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sources Ingested</div>
+      <div class="stat-value green" id="stat-sources">—</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Ingest Card -->
+    <div class="card">
+      <h2>📄 Ingest Documents</h2>
+
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Upload PDF or TXT</label>
+      <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" accept=".pdf,.txt" onchange="handleFileSelect(event)" />
+        <div style="font-size:28px;margin-bottom:8px">📁</div>
+        <div>Drop file here or <strong>click to browse</strong></div>
+        <div style="font-size:12px;margin-top:4px">PDF, TXT supported</div>
+      </div>
+      <input type="text" id="file-source-name" placeholder="Source name (e.g. FAQ 2025)" style="width:100%;margin-top:8px;margin-bottom:8px" />
+      <button class="btn-primary" id="upload-btn" onclick="uploadFile()" style="width:100%">Upload & Ingest</button>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:20px 0" />
+
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Ingest from URL</label>
+      <div class="input-row">
+        <input type="text" id="url-input" placeholder="https://yoursite.com/faq" />
+        <button class="btn-primary" onclick="ingestUrl()">Ingest</button>
+      </div>
+      <input type="text" id="url-source-name" placeholder="Source name" style="width:100%" />
+    </div>
+
+    <!-- Sources Card -->
+    <div class="card">
+      <h2>📚 Knowledge Sources</h2>
+      <div class="sources-list" id="sources-list">
+        <div id="empty-sources">No sources ingested yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Questions -->
+  <div class="card" style="margin-bottom:32px">
+    <h2>💬 Recent Questions</h2>
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="recent-questions">
+        <tr><td colspan="2" style="text-align:center;color:var(--muted);padding:24px">No data yet.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = () => document.getElementById('api-key-input').value || 'change-me-in-production';
+  const TENANT = () => document.getElementById('tenant-input').value || 'demo';
+  const BASE = 'http://localhost:8000';
+
+  async function refreshAll() {
+    document.getElementById('tenant-badge').textContent = `tenant: ${TENANT()}`;
+    await Promise.all([loadAnalytics(), loadSources()]);
+  }
+
+  async function loadAnalytics() {
+    try {
+      const res = await fetch(`${BASE}/analytics/${TENANT()}`, { headers: { 'X-API-Key': API() } });
+      if (!res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-questions').textContent = d.total_questions ?? 0;
+      document.getElementById('stat-cost').textContent = `$${(d.total_cost_usd ?? 0).toFixed(4)}`;
+      document.getElementById('stat-latency').textContent = d.avg_latency_ms ? `${d.avg_latency_ms}ms` : '—';
+
+      const tbody = document.getElementById('recent-questions');
+      if (d.recent_questions?.length) {
+        tbody.innerHTML = d.recent_questions.map(q => `
+          <tr>
+            <td title="${q}">${q}</td>
+            <td><span class="pill pill-green">answered</span></td>
+          </tr>`).join('');
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadSources() {
+    try {
+      const res = await fetch(`${BASE}/ingest/sources/${TENANT()}`, { headers: { 'X-API-Key': API() } });
+      if (!res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-sources').textContent = d.sources.length;
+      renderSources(d.sources);
+    } catch(e) { console.error(e); }
+  }
+
+  function renderSources(sources) {
+    const el = document.getElementById('sources-list');
+    if (!sources.length) {
+      el.innerHTML = '<div id="empty-sources">No sources ingested yet.</div>';
+      return;
+    }
+    el.innerHTML = sources.map(s => `
+      <div class="source-item">
+        <div class="source-info">
+          <div class="source-name">${s.source_name}</div>
+          <div class="source-meta">${s.chunk_count} chunks · ID: ${s.source_id}</div>
+        </div>
+        <button class="btn-danger" style="padding:5px 10px;font-size:12px"
+          onclick="deleteSource('${s.source_id}')">Delete</button>
+      </div>`).join('');
+  }
+
+  async function uploadFile() {
+    const fileInput = document.getElementById('file-input');
+    const sourceName = document.getElementById('file-source-name').value.trim();
+    if (!fileInput.files.length) { showToast('Please select a file first'); return; }
+
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'Uploading...';
+
+    const form = new FormData();
+    form.append('tenant_id', TENANT());
+    form.append('source_name', sourceName || fileInput.files[0].name);
+    form.append('file', fileInput.files[0]);
+
+    try {
+      const res = await fetch(`${BASE}/ingest/file`, {
+        method: 'POST', headers: { 'X-API-Key': API() }, body: form,
+      });
+      const d = await res.json();
+      if (res.ok) {
+        showToast(`✅ Ingested ${d.chunks_ingested} chunks`);
+        fileInput.value = ''; document.getElementById('file-source-name').value = '';
+        loadSources();
+      } else {
+        showToast(`❌ ${d.detail}`);
+      }
+    } catch(e) { showToast('Network error'); } finally {
+      btn.disabled = false; btn.textContent = 'Upload & Ingest';
+    }
+  }
+
+  function handleFileSelect(e) {
+    const name = e.target.files[0]?.name;
+    if (name && !document.getElementById('file-source-name').value) {
+      document.getElementById('file-source-name').value = name.replace(/\.[^.]+$/, '');
+    }
+  }
+
+  async function ingestUrl() {
+    const url = document.getElementById('url-input').value.trim();
+    const sourceName = document.getElementById('url-source-name').value.trim();
+    if (!url) { showToast('Enter a URL'); return; }
+
+    showToast('Scraping URL...');
+    try {
+      const res = await fetch(`${BASE}/ingest/url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API() },
+        body: JSON.stringify({ tenant_id: TENANT(), url, source_name: sourceName || url }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        showToast(`✅ Ingested ${d.chunks_ingested} chunks from URL`);
+        document.getElementById('url-input').value = '';
+        loadSources();
+      } else {
+        showToast(`❌ ${d.detail}`);
+      }
+    } catch(e) { showToast('Network error'); }
+  }
+
+  async function deleteSource(sourceId) {
+    if (!confirm('Delete this source and all its chunks?')) return;
+    const res = await fetch(`${BASE}/ingest/source`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API() },
+      body: JSON.stringify({ tenant_id: TENANT(), source_id: sourceId }),
+    });
+    if (res.ok) { showToast('Source deleted'); loadSources(); }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Drag & drop
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file) { document.getElementById('file-input').files = e.dataTransfer.files; handleFileSelect({target:{files:e.dataTransfer.files}}); }
+  });
+
+  refreshAll();
+</script>
+</body>
+</html>

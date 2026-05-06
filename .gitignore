@@ -1,0 +1,41 @@
+# Secrets & local env (never commit)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+env/
+
+# Testing / tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ChromaDB & app data
+chroma_db/
+**/chroma_db/
+logs/
+*.jsonl
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Node (if added later)
+node_modules/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
